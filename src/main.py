@@ -41,62 +41,65 @@ def clear_files(files):
             print(f"An error occurred while clearing '{file}': {str(e)}")
 
 
-def quicksort(arr):
-    if len(arr) <= 1:
-        return arr
-    else:
-        pivot = arr[0]
-        less = [x for x in arr[1:] if x <= pivot]
-        greater = [x for x in arr[1:] if x > pivot]
-        return quicksort(less) + [pivot] + quicksort(greater)
+def merge_series(input_files, output_files):
+    files = [open(input_file, 'r') for input_file in input_files]
+    inputs = [mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ) for f, input_file in zip(files, input_files) if
+              os.stat(input_file).st_size != 0]
+    outputs = [open(output_file, 'w') for output_file in output_files]
 
-
-def merge_series(input, output):
-    files = [open(input_file, 'r') for input_file in input]
-    input_files = [mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ) for f, input_file in zip(files, input) if
-                   os.stat(input_file).st_size != 0]
-    output_files = [open(output_file, 'w') for output_file in output]
-
-    buffers = [None] * len(input_files)
-
+    num_of_files = len(inputs)
+    values = [None] * num_of_files
+    last_values = [None] * num_of_files
+    series_ends = [False] * num_of_files
+    buffer = [None] * num_of_files
     while True:
-        series = []
-        for i, input_file in enumerate(input_files):
-            file_series = []
-            line = buffers[i] if buffers[i] is not None else input_file.readline()
-            buffers[i] = None
-            while line:
-                num = int(line)
-                if not file_series or num >= file_series[-1]:
-                    file_series.append(num)
-                    line = input_file.readline()
-                else:
-                    buffers[i] = line
-                    break
-            series.extend(file_series)
-
-        if not series and all(not buffer for buffer in buffers):
+        if num_of_files == 0:
             break
+        for i in range(num_of_files):
+            if values[i] is None and not series_ends[i]:
+                if buffer[i]:
+                    line = str(buffer[i])
+                    buffer[i] = None
+                else:
+                    line = inputs[i].readline()
+                if not line.strip():
+                    num_of_files -= 1
+                    inputs[i].close()
+                    del inputs[i]
+                    del values[i]
+                    del last_values[i]
+                    del series_ends[i]
+                    break
+                else:
+                    values[i] = int(line)
+                    if last_values[i] is not None and values[i] < last_values[i]:
+                        series_ends[i] = True
+                        buffer[i] = values[i]
+                        values[i] = None
+                    else:
+                        last_values[i] = values[i]
+        if all(series_ends):
+            values = [None] * num_of_files
+            last_values = [None] * num_of_files
+            series_ends = [False] * num_of_files
+            outputs = outputs[1:] + [outputs[0]]
+        if any(element is not None for element in values):
+            min_value = min(v for v in values if v is not None)
+            min_index = values.index(min_value)
+            outputs[0].write(str(min_value) + '\n')
+            values[min_index] = None
 
-        series = quicksort(series)
-        output_file = output_files[0]
-        for number in series:
-            output_file.write(str(number) + '\n')
-        series.clear()
-
-        output_files = output_files[1:] + [output_files[0]]
-
-    for file in input_files + output_files:
+    for file in inputs + outputs:
         file.close()
 
-    if not(os.stat(output[-1]).st_size == 0 and os.stat(output[-2]).st_size == 0):
+    if not (os.stat(output_files[-1]).st_size == 0 and os.stat(output_files[-2]).st_size == 0):
         print("Run completed!")
-        merge_series(output, input)
+        merge_series(output_files, input_files)
 
 
 def main():
     file_size = 10 * 1024 ** 2
-    input_file = "a1.txt"
+    input_file = "a2.txt"
     output_files_1 = ["b1.txt", "b2.txt", "b3.txt"]
     output_files_2 = ["c1.txt", "c2.txt", "c3.txt"]
     generate(input_file, file_size)
