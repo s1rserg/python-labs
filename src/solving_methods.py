@@ -27,17 +27,17 @@ class DLS(SolvingMethod):
     def recursive_dls(self, node):
         self.node_count += 1
         cutoff_occurred = False
-        if self.puzzle.goal_test(node.state):
+        if self.puzzle.goal_test(node.state):  # досягнуто цільовий стан - завершуємо рекурсію
             self.max_nodes_in_memory = max(self.max_nodes_in_memory, sum(self.nodes_at_depth))
             return node
-        elif node.depth == self.limit:
+        elif node.depth == self.limit:  # досягнуто обмеження глибини - повертаємось назад
             self.max_nodes_in_memory = max(self.max_nodes_in_memory, sum(self.nodes_at_depth))
             self.nodes_at_depth[node.depth] = 0
             return 'cutoff'
         else:
             children = self.puzzle.get_successors(node.state)
             self.nodes_at_depth[node.depth] = len(children)
-            for child in children:
+            for child in children:  # перебираємо нащадків вузла
                 result = self.recursive_dls(Node(child[0], node, child[1], node.depth + 1))
                 if result == 'cutoff':
                     cutoff_occurred = True
@@ -58,19 +58,21 @@ class RBFS(SolvingMethod):
 
     def rbfs(self, node, f_limit):
         self.max_nodes_in_memory = max(self.max_nodes_in_memory, self.current_nodes_in_memory)
-        if self.puzzle.goal_test(node.state):
+        if self.puzzle.goal_test(node.state):  # досягнуто цільовий стан - завершуємо рекурсію
             return node, node.f
         successors = []
         children = self.puzzle.get_successors(node.state)
         if not children:
             return None, float('inf')
         for child in children:
+            # перебираємо нащадків, визначаємо для них f-значення
             new_node = Node(child[0], node, child[1], node.depth + 1)
             new_node.f = max(new_node.depth + self.manhattan_distance(new_node.state), node.f)
             successors.append(new_node)
             self.node_count += 1
             self.current_nodes_in_memory += 1
         while True:
+            # обираємо нащадка з найменшим f-значенням та як альтернативу наступного після нього
             successors.sort(key=lambda x: x.f)
             best = successors[0]
             if best.f > f_limit:
@@ -81,11 +83,11 @@ class RBFS(SolvingMethod):
             if result is not None:
                 return result, best.f
 
-
     def manhattan_distance(self, state):
         distance = 0
-        for i in range(1, 9):
-            xs, ys = divmod(state.index(i), 3)
-            xg, yg = divmod(self.puzzle.goal_state.index(i), 3)
-            distance += abs(xs - xg) + abs(ys - yg)
+        for i in range(1, 9):  # перебираємо усі цифри крім 0
+            # divmod() повертає частку та остачу
+            xs, ys = divmod(state.index(i), 3)  # частка - ряд цифри у пазлі, остача - колонка цифри у пазлі
+            xg, yg = divmod(self.puzzle.goal_state.index(i), 3)  # те саме, тільки у цільовому стані
+            distance += abs(xs - xg) + abs(ys - yg)  # сама манхеттенська відстань
         return distance

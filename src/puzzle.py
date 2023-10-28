@@ -13,6 +13,7 @@ class Puzzle:
         zero_index = state.index(0)
         for action in self.actions:
             target_index = zero_index + self.actions[action]
+            # перевіряємо чи після свапу "0" не буде за межами пазлу
             if (action in ["UP", "DOWN"] and 0 <= target_index < len(state)) or \
                     (action == "LEFT" and zero_index % 3 != 0) or \
                     (action == "RIGHT" and zero_index % 3 != 2):
