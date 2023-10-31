@@ -5,7 +5,7 @@ from node import *
 class SolvingMethod(ABC):
     def __init__(self, puzzle):
         self.puzzle = puzzle
-        self.node_count = 0
+        self.iteration_count = 0
         self.max_nodes_in_memory = 0
 
         super().__init__()
@@ -25,7 +25,6 @@ class DLS(SolvingMethod):
         return self.recursive_dls(Node(self.puzzle.initial_state, None, "INIT", 0))
 
     def recursive_dls(self, node):
-        self.node_count += 1
         cutoff_occurred = False
         if self.puzzle.goal_test(node.state):  # досягнуто цільовий стан - завершуємо рекурсію
             self.max_nodes_in_memory = max(self.max_nodes_in_memory, sum(self.nodes_at_depth))
@@ -35,7 +34,8 @@ class DLS(SolvingMethod):
             self.nodes_at_depth[node.depth] = 0
             return 'cutoff'
         else:
-            children = self.puzzle.get_successors(node.state)
+            self.iteration_count += 1
+            children = self.puzzle.get_successors(node.state, node.action)
             self.nodes_at_depth[node.depth] = len(children)
             for child in children:  # перебираємо нащадків вузла
                 result = self.recursive_dls(Node(child[0], node, child[1], node.depth + 1))
@@ -61,7 +61,8 @@ class RBFS(SolvingMethod):
         if self.puzzle.goal_test(node.state):  # досягнуто цільовий стан - завершуємо рекурсію
             return node, node.f
         successors = []
-        children = self.puzzle.get_successors(node.state)
+        children = self.puzzle.get_successors(node.state, node.action)
+        self.iteration_count += 1
         if not children:
             return None, float('inf')
         for child in children:
@@ -69,7 +70,6 @@ class RBFS(SolvingMethod):
             new_node = Node(child[0], node, child[1], node.depth + 1)
             new_node.f = max(new_node.depth + self.manhattan_distance(new_node.state), node.f)
             successors.append(new_node)
-            self.node_count += 1
             self.current_nodes_in_memory += 1
         while True:
             # обираємо нащадка з найменшим f-значенням та як альтернативу наступного після нього
@@ -85,7 +85,7 @@ class RBFS(SolvingMethod):
 
     def manhattan_distance(self, state):
         distance = 0
-        for i in range(1, 9):  # перебираємо усі цифри крім 0
+        for i in range(0, 9):  # перебираємо цифри
             # divmod() повертає частку та остачу
             xs, ys = divmod(state.index(i), 3)  # частка - ряд цифри у пазлі, остача - колонка цифри у пазлі
             xg, yg = divmod(self.puzzle.goal_state.index(i), 3)  # те саме, тільки у цільовому стані

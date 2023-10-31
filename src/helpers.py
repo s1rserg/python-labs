@@ -74,7 +74,7 @@ def run_search(puzzle, method, limit_dls=0):
         if steps is not None:
             print(f"Solving took {steps} steps")
             print(f"Solving took {solving_time} seconds")
-            print(f"Number of iterations: {rbfs.node_count}")
+            print(f"Number of iterations: {rbfs.iteration_count}")
             print(f"Number of states: {len(puzzle.unique_states)}")
             print(f"Number of states in memory: {rbfs.max_nodes_in_memory}")
     else:
@@ -87,7 +87,7 @@ def run_search(puzzle, method, limit_dls=0):
         if steps is not None:
             print(f"Solving took {steps} steps")
             print(f"Solving took {solving_time} seconds")
-            print(f"Number of iterations: {dls.node_count}")
+            print(f"Number of iterations: {dls.iteration_count}")
             print(f"Number of states: {len(puzzle.unique_states)}")
             print(f"Number of states in memory: {dls.max_nodes_in_memory}")
 
