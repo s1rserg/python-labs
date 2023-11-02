@@ -40,7 +40,7 @@ def main():
                 if validate_positive_integer(limit) and int(limit) < 900:
                     break
                 else:
-                    print("Limit should be less than 900")
+                    print("Limit should be int in bounds 1<=l<900")
             search_thread = threading.Thread(target=run_search, args=(puzzle, "LDFS", int(limit)))
 
         search_thread.start()
