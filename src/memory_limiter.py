@@ -1,7 +1,6 @@
 import sys
 import warnings
 
-import winerror
 import win32api
 import win32job
 
