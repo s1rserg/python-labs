@@ -5,7 +5,7 @@ from knapsack import *
 class TestKnapsack(unittest.TestCase):
 
     def test_calculate_value(self):
-        knapsack = Knapsack(3, 1, (1, 5), (1, 10), 6, 0.05)
+        knapsack = Knapsack(3, 1, (1, 5), (1, 10), 6, 0.05, 1000)
         knapsack.items = [(2, 3), (1, 5), (4, 8)]
 
         # Positive case
@@ -19,7 +19,7 @@ class TestKnapsack(unittest.TestCase):
         print("calculate_value tests passed.")
 
     def test_record_counter(self):
-        knapsack = Knapsack(3, 2, (1, 5), (1, 10), 5, 0.05)
+        knapsack = Knapsack(3, 2, (1, 5), (1, 10), 5, 0.05, 1000)
         knapsack.items = [(2, 3), (1, 5), (4, 8)]
         knapsack.population = [[1, 0, 1], [0, 1, 0]]
 
@@ -34,7 +34,7 @@ class TestKnapsack(unittest.TestCase):
         print("record_counter tests passed.")
 
     def test_crossover(self):
-        knapsack = Knapsack(4, 1, (1, 5), (1, 10), 10, 0.05)
+        knapsack = Knapsack(4, 1, (1, 5), (1, 10), 10, 0.05, 1000)
         parent1 = [1, 0, 1, 0]
         parent2 = [0, 1, 0, 1]
 
@@ -46,7 +46,7 @@ class TestKnapsack(unittest.TestCase):
         print("crossover tests passed.")
 
     def test_mutation(self):
-        knapsack = Knapsack(3, 1, (1, 5), (1, 10), 5, 0.5)
+        knapsack = Knapsack(3, 1, (1, 5), (1, 10), 5, 0.5, 1000)
         knapsack.items = [(2, 3), (1, 5), (4, 8)]
         child = [1, 0, 1]
 
@@ -59,7 +59,7 @@ class TestKnapsack(unittest.TestCase):
         print("mutation tests passed.")
 
     def test_local_improvement(self):
-        knapsack = Knapsack(3, 1, (1, 5), (1, 10), 10, 0.05)
+        knapsack = Knapsack(3, 1, (1, 5), (1, 10), 10, 0.05, 1000)
         knapsack.items = [(2, 3), (1, 5), (4, 8)]
         child = [1, 0, 1]
 
