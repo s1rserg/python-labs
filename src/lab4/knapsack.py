@@ -2,7 +2,8 @@ import random
 
 
 class Knapsack:
-    def __init__(self, num_items, population_size, weight_bounds, value_bounds, max_weight, mutation_probability, iterations):
+    def __init__(self, num_items, population_size, weight_bounds, value_bounds, max_weight, mutation_probability,
+                 iterations):
         self.num_items = num_items
         self.weight_bounds = weight_bounds
         self.value_bounds = value_bounds
@@ -14,6 +15,7 @@ class Knapsack:
         self.record = 0
         self.record_chromosome = []
         self.iterations = iterations
+        self.iterations_without_record_change = 0
 
     def generate_initial_population(self, difficulty_factor=2.3):
         self.population = [
@@ -40,6 +42,10 @@ class Knapsack:
 
     def record_counter(self):
         max_chromosome = max(self.population, key=lambda chromosome: self.calculate_value(chromosome))
+        if self.record_chromosome == max_chromosome:
+            self.iterations_without_record_change += 1
+        else:
+            self.iterations_without_record_change = 0
         self.record = self.calculate_value(max_chromosome)
         self.record_chromosome = max_chromosome
 
@@ -51,7 +57,7 @@ class Knapsack:
 
         values_sum = sum(values)
         if values_sum:
-            proportional_values = [float(i)/values_sum for i in values]
+            proportional_values = [float(i) / values_sum for i in values]
             while True:
                 parent1 = random.choices(self.population, weights=proportional_values, k=1)[0]
                 parent1_index = self.population.index(parent1)
@@ -78,8 +84,8 @@ class Knapsack:
     def crossover(self, parent1, parent2):
         # триточковий оператор схрещування 25%
         size = self.num_items // 4
-        parent1 = [parent1[i:i+size] for i in range(0, self.num_items, size)]
-        parent2 = [parent2[i:i+size] for i in range(0, self.num_items, size)]
+        parent1 = [parent1[i:i + size] for i in range(0, self.num_items, size)]
+        parent2 = [parent2[i:i + size] for i in range(0, self.num_items, size)]
         child1 = parent1[0] + parent2[1] + parent1[2] + parent2[3]
         child2 = parent2[0] + parent1[1] + parent2[2] + parent1[3]
         return child1, child2
@@ -112,25 +118,28 @@ class Knapsack:
                 children[i][min_weight_item_index] = 0
         return children
 
-    def iteration(self):
+    def iteration(self, iteration_num):
         parents = self.select_parents()
         children = self.crossover(parents[0], parents[1])
-        children = self.mutation(children)
-        children = self.local_improvement(children)
+        if iteration_num > 150:
+            children = self.mutation(children)
+        if self.iterations_without_record_change > 20 and iteration_num > 150:
+            children = self.local_improvement(children)
 
         population_values = [self.calculate_value(chromosome) for chromosome in self.population]
-        for i, child in enumerate(children):
-            min_population_element = min(enumerate(population_values), key=lambda x: x[1])
-            child_value = self.calculate_value(child)
-            if child_value and min(child_value, min_population_element[1]) == min_population_element[1]:
-                self.population[min_population_element[0]] = child
+        min_population_element = min(enumerate(population_values), key=lambda x: x[1])
+        children_values = [self.calculate_value(child) for child in children]
+        max_child_index = children_values.index(max(children_values))
+        if (children_values[max_child_index]
+                and min(children_values[max_child_index], min_population_element[1]) == min_population_element[1]):
+            self.population[min_population_element[0]] = children[max_child_index]
         self.record_counter()
 
     def genetic_algorithm(self):
         i_values = []
         record_values = []
         for i in range(self.iterations + 1):
-            self.iteration()
+            self.iteration(i)
             if i % 20 == 0:
                 i_values.append(i)
                 record_values.append(self.record)
