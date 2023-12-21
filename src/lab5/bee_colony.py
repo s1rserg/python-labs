@@ -39,7 +39,6 @@ class BeesAlgorithm:
 
             if steps_taken > self.size - 1:  # шлях більше кількості вершин
                 return [-1]
-        path = remove_duplicates(path)
 
         return path
 
@@ -120,16 +119,3 @@ def roulette_wheel_choice(values):
     chosen_value = random.choices(values, weights=weights, k=1)[0]
     return chosen_value[0]
 
-
-def remove_duplicates(lst):
-    seen = set()
-    seen_index = {}
-    for i, value in enumerate(lst):
-        if value in seen:
-            start_index = seen_index[value]
-            end_index = i
-            lst = lst[:start_index] + lst[end_index:]
-            break
-        seen.add(value)
-        seen_index[value] = i
-    return lst

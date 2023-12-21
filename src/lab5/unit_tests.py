@@ -1,5 +1,5 @@
 import unittest
-from bee_colony import BeesAlgorithm, TaskGraph, remove_duplicates
+from bee_colony import BeesAlgorithm, Graph
 # конкретну поведінку функцій, які використовують випадкові числа, наприклад функцію локального пошуку передбачити неможливо,
 # тому тестую лише те, чиї результати можна з чимось порівнювати
 
@@ -7,7 +7,7 @@ class TestBeeAlgorithm(unittest.TestCase):
 
     def test_calculate_fitness_positive(self):
         print("calculate fitness tests")
-        graph = TaskGraph(5, 1, 5, 1, 10)
+        graph = Graph(5, 1, 5, 1, 10)
         graph.adj_matrix = [
             [0, 0, 1, 0, 9],
             [0, 0, 5, 0, 6],
@@ -22,7 +22,7 @@ class TestBeeAlgorithm(unittest.TestCase):
 
 
     def test_calculate_fitness_negative(self):
-        graph = TaskGraph(5, 1, 5, 1, 10)
+        graph = Graph(5, 1, 5, 1, 10)
         graph.adj_matrix = [
             [0, 0, 1, 0, 9],
             [0, 0, 5, 0, 6],
@@ -36,7 +36,7 @@ class TestBeeAlgorithm(unittest.TestCase):
         self.assertEqual(path[1], 0)
 
     def test_calculate_fitness_edge(self):
-        graph = TaskGraph(5, 1, 5, 1, 10)
+        graph = Graph(5, 1, 5, 1, 10)
         graph.adj_matrix = [
             [0, 0, 1, 0, 9],
             [0, 0, 5, 0, 6],
@@ -49,22 +49,11 @@ class TestBeeAlgorithm(unittest.TestCase):
         ba.calculate_fitness(path)
         self.assertEqual(path[1], 0)
 
-    def test_remove_duplicates_positive(self):
-        print("remove duplicates tests")
-        path = [[0, 1, 0, 1, 4], 0]
-        path[0] = remove_duplicates(path[0])
-        self.assertEqual(path[0], [0, 1, 4])
-
-    def test_remove_duplicates_edge_values(self):
-        path = [[0, 1, 2, 3, 4], 0]
-        path[0] = remove_duplicates(path[0])
-        self.assertEqual(path[0], [0, 1, 2, 3, 4])
-
 class TestTaskGraph(unittest.TestCase):
 
     def test_generate_positive(self):
         print("graph generator tests")
-        graph = TaskGraph(5, 1, 5, 1, 10)
+        graph = Graph(5, 1, 5, 1, 10)
         graph.generate()
         counter = 0
         for i in range(graph.size):
@@ -74,7 +63,7 @@ class TestTaskGraph(unittest.TestCase):
         self.assertEqual(counter, 0)
 
     def test_generate_edge_values(self):
-        graph = TaskGraph(5, 1, 5, 1, 10)
+        graph = Graph(5, 1, 5, 1, 10)
         graph.generate()
         counter = 0
         for i in range(graph.size):
